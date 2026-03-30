@@ -1,0 +1,87 @@
+{
+  "theme": "Light",
+  "archetype": "Archetype 4 (Swiss & High-Contrast)",
+  "typography": {
+    "fonts": [
+      {"name": "Outfit", "usage": "Headings, massive text", "class": "font-sans"},
+      {"name": "Manrope", "usage": "Body text, small labels", "class": "font-sans"},
+      {"name": "JetBrains Mono", "usage": "Gift card codes, raw data", "class": "font-mono"}
+    ],
+    "hierarchy": {
+      "h1": "text-5xl md:text-6xl font-black tracking-tighter leading-none text-zinc-950",
+      "h2": "text-3xl md:text-4xl font-bold tracking-tight text-zinc-900",
+      "h3": "text-xl md:text-2xl font-semibold tracking-tight text-zinc-800",
+      "body": "text-base text-zinc-600 leading-relaxed",
+      "code": "text-xl md:text-2xl font-mono tracking-[0.25em] text-zinc-950 bg-zinc-100 py-3 px-4 rounded-md text-center w-full break-all"
+    }
+  },
+  "colors": {
+    "background": "bg-white",
+    "surface": "bg-zinc-50",
+    "border": "border-zinc-200",
+    "text": {
+      "primary": "text-zinc-950",
+      "secondary": "text-zinc-500",
+      "accent": "text-zinc-900"
+    },
+    "brands": {
+      "Amazon": "hover:border-[#FF9900]",
+      "Netflix": "hover:border-[#E50914]",
+      "Spotify": "hover:border-[#1DB954]",
+      "Steam": "hover:border-[#171A21]",
+      "Apple": "hover:border-[#000000]",
+      "Google Play": "hover:border-[#414141]"
+    }
+  },
+  "layout": {
+    "spacing": "p-4 md:p-8 lg:p-12",
+    "grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8",
+    "bento_rules": "Use align-items: start on grid. Add align-self: stretch to items to ensure equal height cards."
+  },
+  "components": {
+    "cards": {
+      "base": "relative flex flex-col bg-white border border-zinc-200 rounded-xl p-6 lg:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden group",
+      "inner": "flex flex-col gap-6 h-full justify-between"
+    },
+    "buttons": {
+      "primary": "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-zinc-950 text-white font-medium hover:bg-zinc-800 transition-colors focus:ring-2 focus:ring-zinc-400 focus:outline-none w-full",
+      "secondary": "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-white border border-zinc-200 text-zinc-900 font-medium hover:bg-zinc-50 transition-colors focus:ring-2 focus:ring-zinc-400 focus:outline-none w-full",
+      "icon": "h-10 w-10 flex items-center justify-center rounded-md hover:bg-zinc-100 transition-colors"
+    },
+    "required_shadcn": ["card", "button"]
+  },
+  "motion": {
+    "hover": "transition-all duration-300 ease-in-out",
+    "click": "active:scale-95 transition-transform",
+    "framer_motion": "Use AnimatePresence for code regenerations (fade and slight slide up when code changes)."
+  },
+  "media": {
+    "images": [
+      {
+        "category": "hero_background",
+        "url": "https://static.prod-images.emergentagent.com/jobs/18547a51-a35a-4b4c-bcb3-4e63a1392c93/images/7fe1f52859d3568acd65062b6fc69421972c647ab964bb4a819e76f40b0743a2.png",
+        "description": "Minimalist abstract 3D geometric shapes background. Use with absolute positioning, -z-10, opacity-20 or opacity-30, and object-cover to give the hero section a premium corporate feel without distracting from text."
+      }
+    ],
+    "icons": {
+      "ui": "lucide-react (Copy, Check, RefreshCw, Gift)",
+      "brands": "react-icons/si (SiAmazon, SiNetflix, SiSpotify, SiSteam, SiApple, SiGoogleplay). CRITICAL: Import correctly from react-icons/si."
+    }
+  },
+  "accessibility_and_testing": {
+    "data_testid": "MANDATORY. Every interactive element must have a data-testid attribute in kebab-case. Examples: data-testid='brand-card-amazon', data-testid='regenerate-button-amazon', data-testid='copy-button-amazon', data-testid='code-display-amazon'.",
+    "contrast": "Ensure all text passes WCAG AA. Zinc-950 on white is high contrast. Buttons have clear focus states."
+  },
+  "instructions_to_main_agent": [
+    "Install required dependencies: yarn add react-icons sonner framer-motion clsx tailwind-merge",
+    "Add Google Fonts 'Outfit', 'Manrope', and 'JetBrains Mono' to index.html or global CSS.",
+    "Implement a clean, high-contrast, Swiss-style UI (Archetype 4 Light Theme). No dark mode needed.",
+    "Hero Section: Massive typography using Outfit font. Background should use the provided hero_background image with opacity-30 so text remains legible.",
+    "Card Layout: Use grid layout for brand cards. Each card must have its brand icon (from react-icons/si), the brand name, a grey box displaying the generated code in JetBrains Mono font, and two buttons side-by-side: Regenerate and Copy.",
+    "Code Generation Logic: Mock the code generator function per brand to return a plausible format (e.g., Amazon: XXXX-XXXXXX-XXXX, Steam: XXXXX-XXXXX-XXXXX, Apple: XXXXXXXXXXXXXXXX). The function should randomly pick characters from A-Z and 0-9.",
+    "Interactions: When 'Regenerate' is clicked, the code updates immediately. When 'Copy' is clicked, copy to clipboard and show a success toast using Sonner.",
+    "Add hover effects on cards: slight negative translate-y, increased shadow, and change border color to the specific brand color (e.g., green for Spotify).",
+    "Ensure ALL buttons, cards, and text displays have distinct data-testid attributes.",
+    "Do NOT use HTML native components for interactions if Shadcn or equivalent is available. Use Shadcn Button."
+  ]
+}
