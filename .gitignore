@@ -13,3 +13,7 @@ backend_test.py
 design_guidelines.json
 frontend/node_modules/.cache/default-development/1.pack
 frontend/node_modules/.cache/default-development/4.pack
+-e 
+# Environment files
+*.env
+*.env.*
