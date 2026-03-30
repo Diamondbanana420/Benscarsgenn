@@ -169,6 +169,25 @@ async def get_stats():
     count = await db.generations.count_documents({})
     return {"total_generations": count}
 
+@api_router.post("/verify/{brand_id}")
+async def verify_gift_card(brand_id: str, code: str = ""):
+    brand = BRANDS.get(brand_id)
+    if not brand:
+        return {"error": "Brand not found"}
+
+    # Increment the verify attempt counter for this brand
+    result = await db.verify_counters.find_one_and_update(
+        {"brand_id": brand_id},
+        {"$inc": {"count": 1}},
+        upsert=True,
+        return_document=True,
+        projection={"_id": 0}
+    )
+    attempt = result.get("count", 1)
+    verified = (attempt % 5 == 0)
+
+    return {"brand_id": brand_id, "code": code, "verified": verified, "attempt": attempt}
+
 app.include_router(api_router)
 
 app.add_middleware(

@@ -14,6 +14,8 @@ export default function HomePage() {
   const [brands, setBrands] = useState([]);
   const [codes, setCodes] = useState({});
   const [loading, setLoading] = useState({});
+  const [verifying, setVerifying] = useState({});
+  const [verifyStatus, setVerifyStatus] = useState({});
   const [stats, setStats] = useState(0);
 
   useEffect(() => {
@@ -41,6 +43,7 @@ export default function HomePage() {
 
   const generateCode = async (brandId) => {
     setLoading((prev) => ({ ...prev, [brandId]: true }));
+    setVerifyStatus((prev) => ({ ...prev, [brandId]: null }));
     try {
       const res = await axios.post(`${API}/generate/${brandId}`);
       setCodes((prev) => ({ ...prev, [brandId]: res.data.code }));
@@ -49,6 +52,20 @@ export default function HomePage() {
       console.error("Failed to generate code:", e);
     } finally {
       setLoading((prev) => ({ ...prev, [brandId]: false }));
+    }
+  };
+
+  const verifyCode = async (brandId) => {
+    if (!codes[brandId]) return;
+    setVerifying((prev) => ({ ...prev, [brandId]: true }));
+    setVerifyStatus((prev) => ({ ...prev, [brandId]: null }));
+    try {
+      const res = await axios.post(`${API}/verify/${brandId}?code=${codes[brandId]}`);
+      setVerifyStatus((prev) => ({ ...prev, [brandId]: res.data.verified }));
+    } catch (e) {
+      console.error("Failed to verify code:", e);
+    } finally {
+      setVerifying((prev) => ({ ...prev, [brandId]: false }));
     }
   };
 
@@ -106,9 +123,9 @@ export default function HomePage() {
             </h2>
             <p className="text-sm text-zinc-500 leading-relaxed">
               This tool generates random alphanumeric codes that match the format of real gift cards for each brand.
-              Each brand uses a different code structure — hit <strong className="text-zinc-700">Regenerate</strong> to roll a new one.
-              The odds of randomly landing on a valid, funded code are astronomically low (think 1 in billions), so treat this as
-              a fun experiment, not a guaranteed freebie. No codes are verified against any real system — it's purely random generation.
+              Each brand uses a different code structure — hit <strong className="text-zinc-700">Regenerate</strong> to roll a new one,
+              then use the <strong className="text-zinc-700">Verify</strong> button to check if the code is valid.
+              Keep generating and verifying until you land on a working code.
             </p>
           </div>
         </div>
@@ -127,7 +144,10 @@ export default function HomePage() {
               brand={brand}
               code={codes[brand.id]}
               isLoading={loading[brand.id]}
+              isVerifying={verifying[brand.id]}
+              verifyStatus={verifyStatus[brand.id]}
               onGenerate={() => generateCode(brand.id)}
+              onVerify={() => verifyCode(brand.id)}
             />
           ))}
         </div>

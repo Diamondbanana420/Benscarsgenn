@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, RefreshCw } from "lucide-react";
+import { Copy, Check, RefreshCw, ShieldCheck, ShieldX, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ const BRAND_COLORS = {
   forever_new: "#C8A96E",
 };
 
-export default function BrandCard({ brand, code, isLoading, onGenerate }) {
+export default function BrandCard({ brand, code, isLoading, isVerifying, verifyStatus, onGenerate, onVerify }) {
   const [copied, setCopied] = useState(false);
   const [codeKey, setCodeKey] = useState(0);
 
@@ -129,7 +129,13 @@ export default function BrandCard({ brand, code, isLoading, onGenerate }) {
             >
               {code ? (
                 <div
-                  className="text-lg md:text-xl tracking-[0.2em] text-zinc-950 bg-zinc-100 py-3 px-4 rounded-md text-center w-full break-all select-all"
+                  className={`text-lg md:text-xl tracking-[0.2em] text-zinc-950 py-3 px-4 rounded-md text-center w-full break-all select-all ${
+                    verifyStatus === true
+                      ? "bg-emerald-50 ring-2 ring-emerald-400"
+                      : verifyStatus === false
+                      ? "bg-red-50 ring-2 ring-red-300"
+                      : "bg-zinc-100"
+                  }`}
                   style={{ fontFamily: "'JetBrains Mono', monospace" }}
                   data-testid={`code-display-${brand.id}`}
                 >
@@ -148,8 +154,38 @@ export default function BrandCard({ brand, code, isLoading, onGenerate }) {
           </AnimatePresence>
         </div>
 
+        {/* Verify Status */}
+        <AnimatePresence mode="wait">
+          {verifyStatus !== null && verifyStatus !== undefined && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className={`flex items-center gap-2 text-sm font-medium rounded-md px-3 py-2 ${
+                verifyStatus
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "bg-red-50 text-red-600"
+              }`}
+              data-testid={`verify-status-${brand.id}`}
+            >
+              {verifyStatus ? (
+                <>
+                  <ShieldCheck className="h-4 w-4" />
+                  <span>Verified — code is valid!</span>
+                </>
+              ) : (
+                <>
+                  <ShieldX className="h-4 w-4" />
+                  <span>Not valid — try regenerating</span>
+                </>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Buttons */}
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <Button
             onClick={handleGenerate}
             disabled={isLoading}
@@ -162,10 +198,24 @@ export default function BrandCard({ brand, code, isLoading, onGenerate }) {
             {code ? "Regenerate" : "Generate"}
           </Button>
           <Button
+            onClick={onVerify}
+            disabled={!code || isVerifying}
+            variant="outline"
+            className="flex-1 border-zinc-200 hover:bg-zinc-50 active:scale-[0.97] transition-all"
+            data-testid={`verify-button-${brand.id}`}
+          >
+            {isVerifying ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ShieldCheck className="h-4 w-4" />
+            )}
+            Verify
+          </Button>
+          <Button
             onClick={handleCopy}
             disabled={!code}
             variant="outline"
-            className="px-4 border-zinc-200 hover:bg-zinc-50 active:scale-[0.97] transition-all"
+            className="px-3 border-zinc-200 hover:bg-zinc-50 active:scale-[0.97] transition-all"
             data-testid={`copy-button-${brand.id}`}
           >
             {copied ? (

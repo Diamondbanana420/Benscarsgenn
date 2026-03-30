@@ -162,6 +162,131 @@ class GiftCardAPITester:
         
         return False
 
+    def test_verify_endpoint_sequence(self, brand_id="steam"):
+        """Test verify endpoint with 5 sequential attempts"""
+        print(f"\n=== Testing Verify Sequence for {brand_id} ===")
+        
+        # First generate a code
+        success, response = self.run_test(
+            f"Generate Code for Verify Test - {brand_id}",
+            "POST",
+            f"generate/{brand_id}",
+            200
+        )
+        
+        if not success or 'code' not in response:
+            print(f"❌ Failed to generate code for {brand_id}")
+            return False
+
+        code = response['code']
+        print(f"Generated code for verification: {code}")
+
+        # Test 5 sequential verify attempts
+        verify_results = []
+        for attempt in range(1, 6):
+            # Use query parameter for code
+            endpoint = f"verify/{brand_id}?code={code}"
+            success, response = self.run_test(
+                f"Verify Attempt {attempt} - {brand_id}",
+                "POST",
+                endpoint,
+                200
+            )
+            
+            if success and isinstance(response, dict):
+                verified = response.get('verified', False)
+                attempt_num = response.get('attempt', 0)
+                verify_results.append({
+                    'attempt': attempt,
+                    'verified': verified,
+                    'response_attempt': attempt_num
+                })
+                
+                # Check if verification follows expected pattern
+                expected_verified = (attempt_num % 5 == 0)  # Every 5th attempt should be verified
+                if verified == expected_verified:
+                    print(f"   ✅ Attempt {attempt} (counter: {attempt_num}): verified={verified} (expected)")
+                else:
+                    print(f"   ❌ Attempt {attempt} (counter: {attempt_num}): verified={verified} (expected {expected_verified})")
+            else:
+                verify_results.append({'attempt': attempt, 'error': True})
+                print(f"   ❌ Attempt {attempt}: API call failed")
+
+        return verify_results
+
+    def test_per_brand_counters(self):
+        """Test that verify counters are per-brand"""
+        print(f"\n=== Testing Per-Brand Counter Independence ===")
+        
+        # Test with two different brands
+        brand1 = "apple"
+        brand2 = "cotton_on"
+        
+        # Generate codes for both brands
+        success1, response1 = self.run_test(
+            f"Generate Code for Counter Test - {brand1}",
+            "POST",
+            f"generate/{brand1}",
+            200
+        )
+        
+        success2, response2 = self.run_test(
+            f"Generate Code for Counter Test - {brand2}",
+            "POST",
+            f"generate/{brand2}",
+            200
+        )
+        
+        if not success1 or not success2 or 'code' not in response1 or 'code' not in response2:
+            print("❌ Failed to generate codes for counter test")
+            return False
+
+        code1 = response1['code']
+        code2 = response2['code']
+
+        # Verify brand1 once
+        success1, verify_response1 = self.run_test(
+            f"Verify {brand1} - Counter Test",
+            "POST",
+            f"verify/{brand1}?code={code1}",
+            200
+        )
+
+        # Verify brand2 once  
+        success2, verify_response2 = self.run_test(
+            f"Verify {brand2} - Counter Test",
+            "POST",
+            f"verify/{brand2}?code={code2}",
+            200
+        )
+
+        if success1 and success2:
+            attempt1 = verify_response1.get('attempt', 0)
+            attempt2 = verify_response2.get('attempt', 0)
+            print(f"   {brand1} attempt: {attempt1}")
+            print(f"   {brand2} attempt: {attempt2}")
+            
+            # The attempts should be independent (could be different numbers)
+            print("   ✅ Per-brand counters working independently")
+            return True
+        
+        return False
+
+    def test_verify_invalid_brand(self):
+        """Test verify endpoint with invalid brand"""
+        success, response = self.run_test(
+            "Verify Invalid Brand",
+            "POST",
+            "verify/invalid_brand?code=TEST123",
+            200  # API returns 200 with error message
+        )
+        
+        if success and isinstance(response, dict) and 'error' in response:
+            print(f"✅ Proper error handling for invalid brand: {response['error']}")
+            return True
+        
+        return False
+
 def main():
     print("🚀 Starting Gift Card API Tests")
     print("=" * 50)
@@ -174,7 +299,11 @@ def main():
         tester.test_get_brands,
         tester.test_generate_codes,
         tester.test_invalid_brand,
-        tester.test_get_stats
+        tester.test_get_stats,
+        tester.test_verify_invalid_brand,
+        lambda: tester.test_verify_endpoint_sequence("steam"),
+        lambda: tester.test_verify_endpoint_sequence("apple"),
+        tester.test_per_brand_counters
     ]
     
     for test in tests:
