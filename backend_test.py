@@ -7,7 +7,8 @@ class GiftCardAPITester:
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
-        self.expected_brands = ["amazon", "netflix", "spotify", "steam", "apple", "google_play"]
+        self.expected_brands = ["amazon", "netflix", "spotify", "steam", "apple", "google_play", 
+                               "uber_eats", "coles", "woolworths", "seven_eleven", "shein", "cotton_on", "forever_new"]
 
     def run_test(self, name, method, endpoint, expected_status, data=None):
         """Run a single API test"""

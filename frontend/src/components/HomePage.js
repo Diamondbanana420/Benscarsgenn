@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Gift, Zap } from "lucide-react";
+import { Gift, Zap, Info } from "lucide-react";
 import BrandCard from "@/components/BrandCard";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-const BRAND_ORDER = ["amazon", "netflix", "spotify", "steam", "apple", "google_play"];
+const BRAND_ORDER = [
+  "amazon", "netflix", "spotify", "steam", "apple", "google_play",
+  "uber_eats", "coles", "woolworths", "seven_eleven", "shein", "cotton_on", "forever_new"
+];
 
 export default function HomePage() {
   const [brands, setBrands] = useState([]);
@@ -68,7 +71,7 @@ export default function HomePage() {
               <Gift className="h-5 w-5 text-white" />
             </div>
             <span className="text-sm font-medium text-zinc-500 tracking-wide uppercase" style={{ fontFamily: "'Manrope', sans-serif" }}>
-              Gift Card Generator
+              Negged CardGen
             </span>
           </div>
           <h1
@@ -84,12 +87,29 @@ export default function HomePage() {
             className="text-base md:text-lg text-zinc-500 max-w-xl leading-relaxed"
             style={{ fontFamily: "'Manrope', sans-serif" }}
           >
-            Select a brand, hit regenerate until you find a code you like, and
-            copy it to your clipboard instantly.
+            Pick a brand, smash regenerate, and pray to the algorithm gods that one sticks.
           </p>
           <div className="flex items-center gap-2 mt-8 text-sm text-zinc-400" style={{ fontFamily: "'Manrope', sans-serif" }}>
             <Zap className="h-4 w-4" />
             <span data-testid="stats-counter">{stats.toLocaleString()} codes generated</span>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 pt-12 md:pt-16" data-testid="how-it-works">
+        <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-6 md:p-8 flex gap-4">
+          <Info className="h-5 w-5 text-zinc-400 mt-0.5 shrink-0" />
+          <div style={{ fontFamily: "'Manrope', sans-serif" }}>
+            <h2 className="text-lg font-semibold text-zinc-900 mb-2" style={{ fontFamily: "'Outfit', sans-serif" }}>
+              How does this work?
+            </h2>
+            <p className="text-sm text-zinc-500 leading-relaxed">
+              This tool generates random alphanumeric codes that match the format of real gift cards for each brand.
+              Each brand uses a different code structure — hit <strong className="text-zinc-700">Regenerate</strong> to roll a new one.
+              The odds of randomly landing on a valid, funded code are astronomically low (think 1 in billions), so treat this as
+              a fun experiment, not a guaranteed freebie. No codes are verified against any real system — it's purely random generation.
+            </p>
           </div>
         </div>
       </section>

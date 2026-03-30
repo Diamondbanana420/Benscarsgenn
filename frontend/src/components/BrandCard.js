@@ -9,8 +9,9 @@ import {
   SiSteam,
   SiApple,
   SiGoogleplay,
+  SiUbereats,
 } from "react-icons/si";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, ShoppingCart, Leaf, Store, Shirt, Scissors, Gem } from "lucide-react";
 
 const BRAND_ICONS = {
   amazon: ShoppingBag,
@@ -19,6 +20,13 @@ const BRAND_ICONS = {
   steam: SiSteam,
   apple: SiApple,
   google_play: SiGoogleplay,
+  uber_eats: SiUbereats,
+  coles: ShoppingCart,
+  woolworths: Leaf,
+  seven_eleven: Store,
+  shein: Shirt,
+  cotton_on: Scissors,
+  forever_new: Gem,
 };
 
 const BRAND_COLORS = {
@@ -28,6 +36,13 @@ const BRAND_COLORS = {
   steam: "#171A21",
   apple: "#000000",
   google_play: "#34A853",
+  uber_eats: "#06C167",
+  coles: "#E01A22",
+  woolworths: "#125F2A",
+  seven_eleven: "#F47321",
+  shein: "#000000",
+  cotton_on: "#1A1A1A",
+  forever_new: "#C8A96E",
 };
 
 export default function BrandCard({ brand, code, isLoading, onGenerate }) {

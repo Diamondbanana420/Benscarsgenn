@@ -64,6 +64,55 @@ BRANDS = {
         "format": "XXXX-XXXX-XXXX-XXXX-XXXX",
         "color": "#414141",
         "prefix": "GPY"
+    },
+    "uber_eats": {
+        "id": "uber_eats",
+        "name": "Uber Eats",
+        "format": "XXXX-XXXX-XXXX-XXXX",
+        "color": "#06C167",
+        "prefix": "UBE"
+    },
+    "coles": {
+        "id": "coles",
+        "name": "Coles",
+        "format": "XXXX-XXXX-XXXX-XXXX",
+        "color": "#E01A22",
+        "prefix": "COL"
+    },
+    "woolworths": {
+        "id": "woolworths",
+        "name": "Woolworths",
+        "format": "XXXX-XXXX-XXXX-XXXX",
+        "color": "#125F2A",
+        "prefix": "WOW"
+    },
+    "seven_eleven": {
+        "id": "seven_eleven",
+        "name": "7-Eleven",
+        "format": "XXXX-XXXX-XXXX",
+        "color": "#F47321",
+        "prefix": "7EL"
+    },
+    "shein": {
+        "id": "shein",
+        "name": "Shein",
+        "format": "XXXX-XXXX-XXXX-XXXX",
+        "color": "#000000",
+        "prefix": "SHN"
+    },
+    "cotton_on": {
+        "id": "cotton_on",
+        "name": "Cotton On",
+        "format": "XXXXX-XXXXX-XXXXX",
+        "color": "#1A1A1A",
+        "prefix": "CON"
+    },
+    "forever_new": {
+        "id": "forever_new",
+        "name": "Forever New",
+        "format": "XXXX-XXXX-XXXX-XXXX",
+        "color": "#C8A96E",
+        "prefix": "FNW"
     }
 }
 
@@ -89,7 +138,7 @@ def generate_code(format_str: str) -> str:
 
 @api_router.get("/")
 async def root():
-    return {"message": "Gift Card Generator API"}
+    return {"message": "Negged CardGen API"}
 
 @api_router.get("/brands")
 async def get_brands():
