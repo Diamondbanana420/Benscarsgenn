@@ -11,22 +11,30 @@ import {
   SiGoogleplay,
   SiUbereats,
 } from "react-icons/si";
-import { ShoppingBag, ShoppingCart, Leaf, Store, Shirt, Scissors, Gem } from "lucide-react";
+import {
+  AmazonLogo,
+  ColesLogo,
+  WoolworthsLogo,
+  SevenElevenLogo,
+  SheinLogo,
+  CottonOnLogo,
+  ForeverNewLogo,
+} from "@/components/BrandLogos";
 
 const BRAND_ICONS = {
-  amazon: ShoppingBag,
+  amazon: AmazonLogo,
   netflix: SiNetflix,
   spotify: SiSpotify,
   steam: SiSteam,
   apple: SiApple,
   google_play: SiGoogleplay,
   uber_eats: SiUbereats,
-  coles: ShoppingCart,
-  woolworths: Leaf,
-  seven_eleven: Store,
-  shein: Shirt,
-  cotton_on: Scissors,
-  forever_new: Gem,
+  coles: ColesLogo,
+  woolworths: WoolworthsLogo,
+  seven_eleven: SevenElevenLogo,
+  shein: SheinLogo,
+  cotton_on: CottonOnLogo,
+  forever_new: ForeverNewLogo,
 };
 
 const BRAND_COLORS = {
