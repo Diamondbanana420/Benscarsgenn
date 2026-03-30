@@ -4,69 +4,120 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import random
+import string
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 import uuid
 from datetime import datetime, timezone
 
-
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Create the main app without a prefix
 app = FastAPI()
-
-# Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+BRANDS = {
+    "amazon": {
+        "id": "amazon",
+        "name": "Amazon",
+        "format": "XXXX-XXXXXX-XXXX",
+        "color": "#FF9900",
+        "prefix": "AMZ"
+    },
+    "netflix": {
+        "id": "netflix",
+        "name": "Netflix",
+        "format": "XXXX-XXXX-XXXX-XXXX",
+        "color": "#E50914",
+        "prefix": "NFX"
+    },
+    "spotify": {
+        "id": "spotify",
+        "name": "Spotify",
+        "format": "XXXXXXXXXXXX",
+        "color": "#1DB954",
+        "prefix": "SPT"
+    },
+    "steam": {
+        "id": "steam",
+        "name": "Steam",
+        "format": "XXXXX-XXXXX-XXXXX",
+        "color": "#171A21",
+        "prefix": "STM"
+    },
+    "apple": {
+        "id": "apple",
+        "name": "Apple",
+        "format": "XXXXXXXXXXXXXXXX",
+        "color": "#000000",
+        "prefix": "APL"
+    },
+    "google_play": {
+        "id": "google_play",
+        "name": "Google Play",
+        "format": "XXXX-XXXX-XXXX-XXXX-XXXX",
+        "color": "#414141",
+        "prefix": "GPY"
+    }
+}
 
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
+class GeneratedCode(BaseModel):
+    model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    brand_id: str
+    code: str
+    timestamp: str
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
+class StatsResponse(BaseModel):
+    total_generations: int
 
-# Add your routes to the router instead of directly to app
+def generate_code(format_str: str) -> str:
+    chars = string.ascii_uppercase + string.digits
+    result = []
+    for ch in format_str:
+        if ch == 'X':
+            result.append(random.choice(chars))
+        else:
+            result.append(ch)
+    return ''.join(result)
+
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Gift Card Generator API"}
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
+@api_router.get("/brands")
+async def get_brands():
+    return list(BRANDS.values())
 
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
+@api_router.post("/generate/{brand_id}")
+async def generate_gift_card(brand_id: str):
+    brand = BRANDS.get(brand_id)
+    if not brand:
+        return {"error": "Brand not found"}
     
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
+    code = generate_code(brand["format"])
     
-    return status_checks
+    doc = {
+        "id": str(uuid.uuid4()),
+        "brand_id": brand_id,
+        "code": code,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+    await db.generations.insert_one(doc)
+    
+    return {"brand_id": brand_id, "code": code, "id": doc["id"], "timestamp": doc["timestamp"]}
 
-# Include the router in the main app
+@api_router.get("/stats")
+async def get_stats():
+    count = await db.generations.count_documents({})
+    return {"total_generations": count}
+
 app.include_router(api_router)
 
 app.add_middleware(
@@ -77,7 +128,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'

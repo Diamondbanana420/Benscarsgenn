@@ -1,0 +1,117 @@
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Gift, Zap } from "lucide-react";
+import BrandCard from "@/components/BrandCard";
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+const BRAND_ORDER = ["amazon", "netflix", "spotify", "steam", "apple", "google_play"];
+
+export default function HomePage() {
+  const [brands, setBrands] = useState([]);
+  const [codes, setCodes] = useState({});
+  const [loading, setLoading] = useState({});
+  const [stats, setStats] = useState(0);
+
+  useEffect(() => {
+    fetchBrands();
+    fetchStats();
+  }, []);
+
+  const fetchBrands = async () => {
+    try {
+      const res = await axios.get(`${API}/brands`);
+      setBrands(res.data);
+    } catch (e) {
+      console.error("Failed to fetch brands:", e);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const res = await axios.get(`${API}/stats`);
+      setStats(res.data.total_generations);
+    } catch (e) {
+      console.error("Failed to fetch stats:", e);
+    }
+  };
+
+  const generateCode = async (brandId) => {
+    setLoading((prev) => ({ ...prev, [brandId]: true }));
+    try {
+      const res = await axios.post(`${API}/generate/${brandId}`);
+      setCodes((prev) => ({ ...prev, [brandId]: res.data.code }));
+      setStats((prev) => prev + 1);
+    } catch (e) {
+      console.error("Failed to generate code:", e);
+    } finally {
+      setLoading((prev) => ({ ...prev, [brandId]: false }));
+    }
+  };
+
+  const sortedBrands = [...brands].sort(
+    (a, b) => BRAND_ORDER.indexOf(a.id) - BRAND_ORDER.indexOf(b.id)
+  );
+
+  return (
+    <div className="min-h-screen bg-white" data-testid="home-page">
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-zinc-200">
+        <img
+          src="https://static.prod-images.emergentagent.com/jobs/18547a51-a35a-4b4c-bcb3-4e63a1392c93/images/7fe1f52859d3568acd65062b6fc69421972c647ab964bb4a819e76f40b0743a2.png"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-20 -z-10"
+        />
+        <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-16 md:py-24">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-10 w-10 rounded-lg bg-zinc-950 flex items-center justify-center">
+              <Gift className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-sm font-medium text-zinc-500 tracking-wide uppercase" style={{ fontFamily: "'Manrope', sans-serif" }}>
+              Gift Card Generator
+            </span>
+          </div>
+          <h1
+            className="text-5xl md:text-6xl font-black tracking-tighter leading-none text-zinc-950 mb-4"
+            style={{ fontFamily: "'Outfit', sans-serif" }}
+            data-testid="hero-title"
+          >
+            Generate. Copy.
+            <br />
+            <span className="text-zinc-400">Redeem.</span>
+          </h1>
+          <p
+            className="text-base md:text-lg text-zinc-500 max-w-xl leading-relaxed"
+            style={{ fontFamily: "'Manrope', sans-serif" }}
+          >
+            Select a brand, hit regenerate until you find a code you like, and
+            copy it to your clipboard instantly.
+          </p>
+          <div className="flex items-center gap-2 mt-8 text-sm text-zinc-400" style={{ fontFamily: "'Manrope', sans-serif" }}>
+            <Zap className="h-4 w-4" />
+            <span data-testid="stats-counter">{stats.toLocaleString()} codes generated</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Brand Grid */}
+      <section className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+          style={{ alignItems: "start" }}
+          data-testid="brand-grid"
+        >
+          {sortedBrands.map((brand) => (
+            <BrandCard
+              key={brand.id}
+              brand={brand}
+              code={codes[brand.id]}
+              isLoading={loading[brand.id]}
+              onGenerate={() => generateCode(brand.id)}
+            />
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}

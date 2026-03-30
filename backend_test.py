@@ -1,0 +1,198 @@
+import requests
+import sys
+from datetime import datetime
+
+class GiftCardAPITester:
+    def __init__(self, base_url="https://card-regen-app.preview.emergentagent.com/api"):
+        self.base_url = base_url
+        self.tests_run = 0
+        self.tests_passed = 0
+        self.expected_brands = ["amazon", "netflix", "spotify", "steam", "apple", "google_play"]
+
+    def run_test(self, name, method, endpoint, expected_status, data=None):
+        """Run a single API test"""
+        url = f"{self.base_url}/{endpoint}"
+        headers = {'Content-Type': 'application/json'}
+
+        self.tests_run += 1
+        print(f"\n🔍 Testing {name}...")
+        
+        try:
+            if method == 'GET':
+                response = requests.get(url, headers=headers, timeout=10)
+            elif method == 'POST':
+                response = requests.post(url, json=data, headers=headers, timeout=10)
+
+            success = response.status_code == expected_status
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                try:
+                    return success, response.json()
+                except:
+                    return success, response.text
+            else:
+                print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
+                print(f"Response: {response.text}")
+
+            return success, {}
+
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, {}
+
+    def test_root_endpoint(self):
+        """Test root API endpoint"""
+        success, response = self.run_test(
+            "Root API Endpoint",
+            "GET",
+            "",
+            200
+        )
+        if success and isinstance(response, dict) and "message" in response:
+            print(f"✅ Root message: {response['message']}")
+        return success
+
+    def test_get_brands(self):
+        """Test GET /brands endpoint"""
+        success, response = self.run_test(
+            "Get All Brands",
+            "GET",
+            "brands",
+            200
+        )
+        
+        if success and isinstance(response, list):
+            brand_ids = [brand.get('id') for brand in response if isinstance(brand, dict)]
+            print(f"✅ Found {len(brand_ids)} brands: {brand_ids}")
+            
+            # Check if all expected brands are present
+            missing_brands = set(self.expected_brands) - set(brand_ids)
+            if missing_brands:
+                print(f"❌ Missing brands: {missing_brands}")
+                return False
+            
+            # Verify brand structure
+            for brand in response:
+                required_fields = ['id', 'name', 'format', 'color', 'prefix']
+                missing_fields = [field for field in required_fields if field not in brand]
+                if missing_fields:
+                    print(f"❌ Brand {brand.get('id')} missing fields: {missing_fields}")
+                    return False
+            
+            print("✅ All brands have required fields")
+            return True
+        
+        return False
+
+    def test_generate_codes(self):
+        """Test POST /generate/{brand_id} for each brand"""
+        all_passed = True
+        generated_codes = {}
+        
+        for brand_id in self.expected_brands:
+            success, response = self.run_test(
+                f"Generate Code for {brand_id}",
+                "POST",
+                f"generate/{brand_id}",
+                200
+            )
+            
+            if success and isinstance(response, dict):
+                if 'code' in response and 'brand_id' in response:
+                    generated_codes[brand_id] = response['code']
+                    print(f"✅ Generated code for {brand_id}: {response['code']}")
+                else:
+                    print(f"❌ Invalid response structure for {brand_id}")
+                    all_passed = False
+            else:
+                all_passed = False
+        
+        # Test regeneration (should produce different codes)
+        if generated_codes:
+            test_brand = list(generated_codes.keys())[0]
+            success, response = self.run_test(
+                f"Regenerate Code for {test_brand}",
+                "POST",
+                f"generate/{test_brand}",
+                200
+            )
+            
+            if success and isinstance(response, dict) and 'code' in response:
+                new_code = response['code']
+                old_code = generated_codes[test_brand]
+                if new_code != old_code:
+                    print(f"✅ Regeneration works - Old: {old_code}, New: {new_code}")
+                else:
+                    print(f"⚠️  Warning: Regenerated same code (could be random)")
+            else:
+                all_passed = False
+        
+        return all_passed
+
+    def test_invalid_brand(self):
+        """Test POST /generate/{brand_id} with invalid brand"""
+        success, response = self.run_test(
+            "Generate Code for Invalid Brand",
+            "POST",
+            "generate/invalid_brand",
+            200  # API returns 200 with error message
+        )
+        
+        if success and isinstance(response, dict) and 'error' in response:
+            print(f"✅ Proper error handling: {response['error']}")
+            return True
+        
+        return False
+
+    def test_get_stats(self):
+        """Test GET /stats endpoint"""
+        success, response = self.run_test(
+            "Get Generation Stats",
+            "GET",
+            "stats",
+            200
+        )
+        
+        if success and isinstance(response, dict) and 'total_generations' in response:
+            count = response['total_generations']
+            print(f"✅ Total generations: {count}")
+            return True
+        
+        return False
+
+def main():
+    print("🚀 Starting Gift Card API Tests")
+    print("=" * 50)
+    
+    tester = GiftCardAPITester()
+    
+    # Run all tests
+    tests = [
+        tester.test_root_endpoint,
+        tester.test_get_brands,
+        tester.test_generate_codes,
+        tester.test_invalid_brand,
+        tester.test_get_stats
+    ]
+    
+    for test in tests:
+        try:
+            test()
+        except Exception as e:
+            print(f"❌ Test failed with exception: {str(e)}")
+            tester.tests_run += 1
+    
+    # Print final results
+    print("\n" + "=" * 50)
+    print(f"📊 Final Results: {tester.tests_passed}/{tester.tests_run} tests passed")
+    
+    if tester.tests_passed == tester.tests_run:
+        print("🎉 All tests passed!")
+        return 0
+    else:
+        print("❌ Some tests failed")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
