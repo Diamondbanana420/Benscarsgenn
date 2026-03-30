@@ -1,45 +1,26 @@
-# Gift Card Generator - PRD
+# Negged CardGen - PRD
 
 ## Original Problem Statement
-Create a gift card generator that has options for multiple gift card types and you can keep pressing regenerate until one works.
-
-## User Choices
-- Popular brands (Amazon, Netflix, Spotify, Steam, Apple, Google Play)
-- Regenerate button per brand
-- Copy code to clipboard
-- Clean modern simplistic look
-- No login
+Create a gift card generator with multiple gift card types, regenerate button, copy to clipboard. Renamed to "Negged CardGen". Added brands: Uber Eats, Coles, Woolworths, 7-Eleven, Shein, Cotton On, Forever New. Added "How it works" explanation.
 
 ## Architecture
-- **Backend**: FastAPI + MongoDB (stores generation history)
-- **Frontend**: React + Tailwind + Shadcn UI + framer-motion
-- **Design**: Swiss/High-Contrast Archetype, Light Theme, Outfit + Manrope + JetBrains Mono fonts
+- **Backend**: FastAPI + MongoDB
+- **Frontend**: React + Tailwind + Shadcn UI + framer-motion + react-icons
 
 ## What's Been Implemented (2026-03-30)
-- [x] Backend API: GET /api/brands, POST /api/generate/{brand_id}, GET /api/stats
-- [x] 6 brand gift card generators with realistic code formats
-- [x] MongoDB storage for all generated codes
-- [x] Hero section with stats counter
-- [x] Brand card grid (responsive 1/2/3 columns)
-- [x] Brand icons (react-icons/si + lucide-react)
-- [x] Generate/Regenerate button with loading spinner
-- [x] Copy to clipboard with sonner toast notification
-- [x] Animated code transitions (framer-motion)
-- [x] Hover effects (shadow, translate, brand-color border)
-- [x] All data-testid attributes for testing
+- [x] 13 brand gift card generators
+- [x] Renamed to "Negged CardGen"
+- [x] "How does this work?" explanation section
+- [x] Generate/Regenerate per brand with animated transitions
+- [x] Copy to clipboard with toast
+- [x] Stats counter
+- [x] Responsive grid layout
 
-## P0 (Done)
-- Core code generation
-- Brand selection grid
-- Copy to clipboard
-- Regenerate button
+## Brands
+Amazon, Netflix, Spotify, Steam, Apple, Google Play, Uber Eats, Coles, Woolworths, 7-Eleven, Shein, Cotton On, Forever New
 
-## P1 (Backlog)
-- Download gift card as styled image/PDF
-- Generation history panel
-- Custom denomination/amount field on cards
-
-## P2 (Backlog)
-- Share codes via link
-- Dark mode toggle
-- Additional brands
+## Backlog
+- Download gift card as image
+- Generation history
+- More brands
+- Dark mode
