@@ -14,8 +14,8 @@ COPY backend/requirements.txt backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
 # Install frontend dependencies and build
-COPY frontend/package.json frontend/yarn.lock frontend/
-RUN cd frontend && yarn install --frozen-lockfile
+COPY frontend/package.json frontend/
+RUN cd frontend && yarn install
 
 COPY frontend/ frontend/
 RUN cd frontend && yarn build
